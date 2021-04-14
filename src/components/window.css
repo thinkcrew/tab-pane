@@ -1,0 +1,63 @@
+section.window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  border-left: 4px solid #777;
+  border-right: 4px solid #777;
+}
+
+.tabs-bar {
+  height: 4rem;
+  width: 100%;
+  background-color: #222;
+  display: flex;
+}
+
+.tab {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 1rem 2rem;
+  background-color: #333;
+  border-left: 1px solid #111;
+  border-right: 1px solid #111;
+  display: grid;
+  place-items: center;
+}
+.tab p {
+  margin: 0;
+}
+
+.content-area {
+  width: 100%;
+  flex: 1;
+  position: relative;
+}
+
+p.tab-content {
+  position: relative;
+  z-index: 10;
+}
+
+.body-drop-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 50%;
+}
+.body-drop-left {
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  width: 20%;
+}
+.body-drop-right {
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  right: 0;
+  width: 20%;
+}
