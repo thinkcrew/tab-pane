@@ -66,7 +66,7 @@ const Window: React.FC<WindowProps> = ({ tabWindow, index }) => {
         </Droppable>
       </div>
       <div className="content-area">
-        <Droppable droppableId={`${tabWindow.id}-bottom`}>
+        <Droppable droppableId={`${tabWindow.id}-bottom-${index}`}>
           {(provided, snapshot) => (
             <div
               className="body-drop-bottom"
@@ -78,7 +78,7 @@ const Window: React.FC<WindowProps> = ({ tabWindow, index }) => {
             </div>
           )}
         </Droppable>
-        <Droppable droppableId={`${tabWindow.id}-left`}>
+        <Droppable droppableId={`${tabWindow.id}-left-${index}`}>
           {(provided, snapshot) => (
             <div
               className="body-drop-left"
@@ -90,7 +90,7 @@ const Window: React.FC<WindowProps> = ({ tabWindow, index }) => {
             </div>
           )}
         </Droppable>
-        <Droppable droppableId={`${tabWindow.id}-right`}>
+        <Droppable droppableId={`${tabWindow.id}-right-${index}`}>
           {(provided, snapshot) => (
             <div
               className="body-drop-right"

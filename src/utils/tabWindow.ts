@@ -10,7 +10,7 @@ export interface TabWindow {
 
 export interface SectionWindow {
   id: string;
-  isNested: boolean;
+  parentId: string | null;
   isVertical: boolean;
   primaryAxis: (TabWindow | SectionWindow)[]; // array of windows that stack along the primary axis
 }
@@ -19,6 +19,11 @@ export function isWindowSection(
   item: TabWindow | SectionWindow
 ): item is SectionWindow {
   return (item as SectionWindow).primaryAxis !== undefined;
+}
+export function isTabWindow(
+  item: TabWindow | SectionWindow
+): item is TabWindow {
+  return (item as TabWindow).tabs !== undefined;
 }
 
 export function addWindowSectionAtIndex(
@@ -46,19 +51,17 @@ export function findWindowById(
 }
 
 export function findSectionWindowById(
-  id: string,
+  id: string | null,
   array: (TabWindow | SectionWindow)[]
 ): SectionWindow | undefined {
-  let result;
   for (let window of array) {
     if (isWindowSection(window)) {
       if (window.id === id) {
         return window;
       } else {
-        result = findSectionWindowById(id, window.primaryAxis);
+        const result = findSectionWindowById(id, window.primaryAxis);
         if (result !== undefined) return result;
       }
     }
   }
-  return result;
 }

@@ -14,6 +14,7 @@ import {
   findWindowById,
   findSectionWindowById,
   isWindowSection,
+  isTabWindow,
   SectionWindow,
   TabWindow,
 } from "./utils/tabWindow";
@@ -57,6 +58,28 @@ function App() {
           /**
            * REMOVE WINDOW FROM PARENT PRIMARY AXIS
            */
+
+          // find parent
+          let parent: SectionWindow | TabWindow =
+            window.parentId === structureClone.id
+              ? structureClone
+              : findSectionWindowById(
+                  window.parentId as string,
+                  structure.primaryAxis
+                )!;
+          // filter out window with no tabs
+          parent.primaryAxis = parent.primaryAxis.filter((window) => {
+            if (isTabWindow(window)) {
+              return window.tabs.length > 0;
+            } else if (isWindowSection(window)) {
+              return window.primaryAxis.length > 0;
+            }
+            return false;
+          });
+          // if only one element, transform to tabwindow
+          if (parent.primaryAxis.length === 1) {
+            parent = parent.primaryAxis[0];
+          }
         }
         const destinationWindow = findWindowById(
           destinationId,
@@ -66,6 +89,41 @@ function App() {
         if (destinationWindow) {
           // add to existing window's tabs
           destinationWindow.tabs.push(tab[0]);
+          let parent: SectionWindow | TabWindow =
+            destinationWindow.parentId === structureClone.id
+              ? structureClone
+              : findSectionWindowById(
+                  window.parentId as string,
+                  structure.primaryAxis
+                )!;
+          findSectionWindowById(
+            destinationWindow.parentId as string,
+            structure.primaryAxis
+          )!;
+          // filter out window with no tabs
+          parent.primaryAxis = parent.primaryAxis?.filter((window) => {
+            if (isTabWindow(window)) {
+              return window.tabs.length > 0;
+            } else if (isWindowSection(window)) {
+              return window.primaryAxis.length > 0;
+            }
+            return false;
+          });
+          // if only one element, transform to tabwindow
+          if (parent.primaryAxis?.length === 1) {
+            const grandparent =
+              structureClone.id === parent.parentId
+                ? structureClone
+                : findSectionWindowById(
+                    parent.parentId,
+                    structureClone.primaryAxis
+                  );
+            const parentIndex = grandparent?.primaryAxis.indexOf(parent);
+            if (grandparent && parentIndex) {
+              grandparent.primaryAxis[parentIndex] = parent.primaryAxis[0];
+              grandparent.primaryAxis[parentIndex].parentId = grandparent.id;
+            }
+          }
           /**
            * TODO PLACE IN CORRECT ORDER
            * RESULT.DESTINATION.INDEX
@@ -119,7 +177,8 @@ function App() {
             destinationSibling.parentIsVertical = parent.isVertical;
             const newSectionWindow = createNewSectionWindow(
               [destinationSibling, newWindow],
-              !parent.isVertical
+              !parent.isVertical,
+              parent.id
             );
             const destinationSiblingIndex = parent.primaryAxis.indexOf(
               destinationSibling
@@ -157,7 +216,8 @@ function App() {
 
         const newSectionWindow = createNewSectionWindow(
           [window, newTabWindow],
-          isVertical
+          isVertical,
+          null
         );
         setStructure(newSectionWindow);
       }

@@ -67,7 +67,8 @@ export const createNewTabWindow = (
 
 export const createNewSectionWindow = (
   tabWindows: TabWindow[],
-  isVertical: boolean
+  isVertical: boolean,
+  parentId: string | null
 ): SectionWindow => {
   const id = createUniqueWindowId();
   tabWindows.forEach((window) => {
@@ -77,7 +78,7 @@ export const createNewSectionWindow = (
   return {
     isVertical: isVertical,
     primaryAxis: tabWindows,
-    isNested: true,
     id,
+    parentId,
   };
 };
