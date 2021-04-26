@@ -36,9 +36,10 @@ function App() {
     // WILL EVALUATE FALSE IF IN INTITIAL STATE WITH ONE WINDOW
     if (isWindowSection(structure)) {
       // copy data structure to avoid directly mutating state
-      let structureClone = { ...structure };
+      let structureClone: SectionWindow | TabWindow = { ...structure };
       // get reference to copy of source window
       let window = findWindowById(sourceId, structure.primaryAxis)!;
+
       if (sourceId === destinationId) {
         // IS IN SAME WINDOW, REORDER TABS
         // show content of dragged tab
@@ -52,21 +53,19 @@ function App() {
         window.tabs = items;
         setStructure(structureClone);
       } else {
+        // DROPPING IN DIFFERENT WINDOW
         // parse drop zone
         const tab = window.tabs.splice(result.source.index, 1)!;
-        if (!window.tabs.length) {
-          /**
-           * REMOVE WINDOW FROM PARENT PRIMARY AXIS
-           */
+        // find parent
+        let parent: SectionWindow | TabWindow =
+          window.parentId === structureClone.id
+            ? structureClone
+            : findSectionWindowById(
+                window.parentId as string,
+                structureClone.primaryAxis
+              )!;
 
-          // find parent
-          let parent: SectionWindow | TabWindow =
-            window.parentId === structureClone.id
-              ? structureClone
-              : findSectionWindowById(
-                  window.parentId as string,
-                  structure.primaryAxis
-                )!;
+        if (!window.tabs.length) {
           // filter out window with no tabs
           parent.primaryAxis = parent.primaryAxis.filter((window) => {
             if (isTabWindow(window)) {
@@ -76,10 +75,42 @@ function App() {
             }
             return false;
           });
+          const grandparent =
+            structureClone.id === parent.parentId
+              ? structureClone
+              : findSectionWindowById(
+                  parent.parentId,
+                  structureClone.primaryAxis
+                );
+          const parentIndex = grandparent?.primaryAxis.indexOf(parent);
+          if (parent.primaryAxis.length === 0 && grandparent !== undefined) {
+            // remove empty section window from grandparent primary axis
+            grandparent.primaryAxis = grandparent?.primaryAxis.filter(
+              (window) => window.id !== parent.id
+            );
+          }
           // if only one element, transform to tabwindow
           if (parent.primaryAxis.length === 1) {
-            parent = parent.primaryAxis[0];
+            if (grandparent && parentIndex) {
+              grandparent.primaryAxis[parentIndex] = parent.primaryAxis[0];
+              grandparent.primaryAxis[parentIndex].parentId = grandparent.id;
+              grandparent.primaryAxis.forEach((window) => {
+                if (isTabWindow(window)) {
+                  window.parentIsVertical = grandparent.isVertical;
+                }
+              });
+            }
           }
+          // if (
+          //   parent.primaryAxis.length > 1 &&
+          //   parent.isVertical === grandparent?.isVertical
+          // ) {
+          //   console.log("HKJFDSKJHSDFKHJSDFKHJ");
+          //   const parentWindows = parent.primaryAxis;
+          //   if (parentIndex) {
+          //     grandparent.primaryAxis.splice(parentIndex, 1, ...parentWindows);
+          //   }
+          // }
         }
         const destinationWindow = findWindowById(
           destinationId,
@@ -93,13 +124,10 @@ function App() {
             destinationWindow.parentId === structureClone.id
               ? structureClone
               : findSectionWindowById(
-                  window.parentId as string,
+                  destinationWindow.parentId as string,
                   structure.primaryAxis
                 )!;
-          findSectionWindowById(
-            destinationWindow.parentId as string,
-            structure.primaryAxis
-          )!;
+
           // filter out window with no tabs
           parent.primaryAxis = parent.primaryAxis?.filter((window) => {
             if (isTabWindow(window)) {
@@ -129,6 +157,13 @@ function App() {
            * RESULT.DESTINATION.INDEX
            * SEE ABOVE
            */
+          if (
+            isWindowSection(structureClone) &&
+            structureClone.primaryAxis.length === 1
+          ) {
+            // reset to default state of single tab window
+            structureClone = structureClone.primaryAxis[0];
+          }
           setStructure(structureClone);
         } else {
           // create new window
