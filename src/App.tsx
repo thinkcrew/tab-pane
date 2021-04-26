@@ -17,6 +17,7 @@ import {
   isTabWindow,
   SectionWindow,
   TabWindow,
+  removeRedundantSectionWindows,
 } from "./utils/tabWindow";
 
 function App() {
@@ -163,6 +164,10 @@ function App() {
           ) {
             // reset to default state of single tab window
             structureClone = structureClone.primaryAxis[0];
+            structureClone.parentId = null;
+          }
+          if (isWindowSection(structureClone)) {
+            removeRedundantSectionWindows(structureClone);
           }
           setStructure(structureClone);
         } else {
