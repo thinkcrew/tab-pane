@@ -4,6 +4,7 @@ import {
   reorder,
   createNewTabWindow,
   createNewSectionWindow,
+  getColumnOffset,
 } from "./utils/dragFunctions";
 
 import "./App.css";
@@ -18,6 +19,7 @@ import {
   SectionWindow,
   TabWindow,
   removeRedundantSectionWindows,
+  addWindowSectionAtIndex,
 } from "./utils/tabWindow";
 
 function App() {
@@ -102,16 +104,6 @@ function App() {
               });
             }
           }
-          // if (
-          //   parent.primaryAxis.length > 1 &&
-          //   parent.isVertical === grandparent?.isVertical
-          // ) {
-          //   console.log("HKJFDSKJHSDFKHJSDFKHJ");
-          //   const parentWindows = parent.primaryAxis;
-          //   if (parentIndex) {
-          //     grandparent.primaryAxis.splice(parentIndex, 1, ...parentWindows);
-          //   }
-          // }
         }
         const destinationWindow = findWindowById(
           destinationId,
@@ -207,12 +199,25 @@ function App() {
               destinationDropZone !== "bottom")
           ) {
             // APPEND TO PARENT PRIMARY AXIS
-            parent.primaryAxis.push(newWindow);
-            /**
-             * TODO
-             * PLACE IN CORRECT INDEX
-             */
+            let siblingIndex = parent.primaryAxis.indexOf(destinationSibling);
+            if (destinationSibling.parentIsVertical) {
+              addWindowSectionAtIndex(
+                newWindow,
+                parent.primaryAxis,
+                siblingIndex + 1
+              );
+            } else {
+              siblingIndex += getColumnOffset(destinationId);
+              addWindowSectionAtIndex(
+                newWindow,
+                parent.primaryAxis,
+                siblingIndex
+              );
+            }
           } else {
+            /**
+             * TODO: PLACE AT CORRECT INDEX
+             */
             // TRANSFORM TAB WINDOW TO SECTION WINDOW
             destinationSibling.parentIsVertical = parent.isVertical;
             const newSectionWindow = createNewSectionWindow(

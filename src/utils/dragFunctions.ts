@@ -48,7 +48,7 @@ export const isSameColumn = (dropZoneId: string): boolean => {
 
 export const getColumnOffset = (dropZoneId: string): number => {
   const parsedId = dropZoneId.split("-");
-  return parsedId[1] === "right" ? 1 : -1;
+  return parsedId[1] === "right" ? 1 : 0;
 };
 
 export const createNewTabWindow = (
@@ -60,7 +60,7 @@ export const createNewTabWindow = (
     tabs: tab,
     id: createUniqueWindowId(),
     selectedTabId: tab[0].id,
-    parentIsVertical: !parentIsVertical,
+    parentIsVertical: parentIsVertical,
     parentId,
   };
 };

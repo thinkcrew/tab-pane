@@ -68,7 +68,7 @@ export function findSectionWindowById(
 
 export function removeRedundantSectionWindows(structure: SectionWindow): void {
   const { primaryAxis } = structure;
-  for (let i = 0; i < structure.primaryAxis.length; i++) {
+  for (let i = 0; i < primaryAxis.length; i++) {
     let current = primaryAxis[i];
     if (
       isWindowSection(current) &&

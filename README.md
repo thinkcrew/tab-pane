@@ -1,46 +1,20 @@
-# Getting Started with Create React App
+A Tab has an ID, Name, and Content.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A Tab Window has an array of Tabs, a selected tab, and some data about its parent.
 
-## Available Scripts
+A Section Window has a "primary axis" of either Tab Windows or other nested Section Windows. The primary axis direction (represented by the "isVertical: boolean" property) of each nested level of Section Windows is perpendicular to its parent.
 
-In the project directory, you can run:
+The default state is a single Tab Window with all of the tabs.
 
-### `npm start`
+As soon as you drag a tab to a drop zone, the state:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- transforms to a top-level Section Window with two Tab Windows
+- the primary axis direction is set via the "isVertical" property
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+On subsequent drag and drops, depending on the drop zone location and primary axis of the parent, the function will either:
 
-### `npm test`
+- create a new Tab Window from the Tab and add to the primary axis of the parent
+- or -
+- transform the destination Tab Window to a Section Window with a primary axis perpendicular to that of its parent
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Thus, the entire structure is recursive. Section Windows nested within Section Windows, with alternating primary axis directions. Care must be taken to keep the parentId and parentIsVertical properties updated when nesting.
