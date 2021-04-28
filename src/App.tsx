@@ -216,19 +216,32 @@ function App() {
             }
           } else {
             /**
-             * TODO: PLACE AT CORRECT INDEX
+             * TRANSFORM TAB WINDOW TO SECTION WINDOW
              */
-            // TRANSFORM TAB WINDOW TO SECTION WINDOW
             destinationSibling.parentIsVertical = parent.isVertical;
-            const newSectionWindow = createNewSectionWindow(
-              [destinationSibling, newWindow],
-              !parent.isVertical,
-              parent.id
-            );
-            const destinationSiblingIndex = parent.primaryAxis.indexOf(
+            let destinationSiblingIndex = parent.primaryAxis.indexOf(
               destinationSibling
             );
-            parent.primaryAxis[destinationSiblingIndex] = newSectionWindow;
+            if (
+              destinationSibling.parentIsVertical &&
+              !getColumnOffset(destinationId)
+            ) {
+              // determine if on left or right side and construct array accordingly
+              const newSectionWindow = createNewSectionWindow(
+                [newWindow, destinationSibling],
+                !parent.isVertical,
+                parent.id
+              );
+              parent.primaryAxis[destinationSiblingIndex] = newSectionWindow;
+            } else {
+              // add it to
+              const newSectionWindow = createNewSectionWindow(
+                [destinationSibling, newWindow],
+                !parent.isVertical,
+                parent.id
+              );
+              parent.primaryAxis[destinationSiblingIndex] = newSectionWindow;
+            }
           }
 
           setStructure(structureClone);
