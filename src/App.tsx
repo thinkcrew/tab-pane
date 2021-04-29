@@ -43,6 +43,14 @@ function App() {
       // get reference to copy of source window
       let window = findWindowById(sourceId, structure.primaryAxis)!;
 
+      if (
+        window.tabs.length === 1 &&
+        sourceId === destinationId.split("-")[0]
+      ) {
+        // PREVENT CRASH WHEN DRAGGING SINGLE TAB INTO ITS OWN DROP ZONES
+        return;
+      }
+
       if (sourceId === destinationId) {
         // IS IN SAME WINDOW, REORDER TABS
         // show content of dragged tab
