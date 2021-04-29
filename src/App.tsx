@@ -119,8 +119,10 @@ function App() {
         );
 
         if (destinationWindow) {
-          // add to existing window's tabs
-          destinationWindow.tabs.push(tab[0]);
+          // add to existing window's tabs in correct order
+          destinationWindow.tabs.splice(result.destination.index, 0, tab[0]);
+          destinationWindow.selectedTabId = tab[0].id;
+
           let parent: SectionWindow | TabWindow =
             destinationWindow.parentId === structureClone.id
               ? structureClone
@@ -153,11 +155,7 @@ function App() {
               grandparent.primaryAxis[parentIndex].parentId = grandparent.id;
             }
           }
-          /**
-           * TODO PLACE IN CORRECT ORDER
-           * RESULT.DESTINATION.INDEX
-           * SEE ABOVE
-           */
+
           if (
             isWindowSection(structureClone) &&
             structureClone.primaryAxis.length === 1
