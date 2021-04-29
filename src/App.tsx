@@ -278,8 +278,16 @@ function App() {
         const newTabWindow = createNewTabWindow(tab, !isVertical, structure.id);
         window.parentIsVertical = isVertical;
 
+        let primaryAxis = [];
+
+        if (!isVertical && destinationZone === "left") {
+          primaryAxis = [newTabWindow, window];
+        } else {
+          primaryAxis = [window, newTabWindow];
+        }
+
         const newSectionWindow = createNewSectionWindow(
-          [window, newTabWindow],
+          primaryAxis,
           isVertical,
           null
         );
