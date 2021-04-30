@@ -50,6 +50,10 @@ export const getColumnOffset = (dropZoneId: string): number => {
   const parsedId = dropZoneId.split("-");
   return parsedId[1] === "right" ? 1 : 0;
 };
+export const getRowOffset = (dropZoneId: string): number => {
+  const parsedId = dropZoneId.split("-");
+  return parsedId[1] === "bottom" ? 1 : 0;
+};
 
 export const createNewTabWindow = (
   tab: TabData[],

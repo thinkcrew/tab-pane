@@ -40,6 +40,13 @@ p.tab-content {
   z-index: 10;
 }
 
+.body-drop-top {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 50%;
+}
 .body-drop-bottom {
   position: absolute;
   bottom: 0;

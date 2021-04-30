@@ -5,6 +5,7 @@ import {
   createNewTabWindow,
   createNewSectionWindow,
   getColumnOffset,
+  getRowOffset,
 } from "./utils/dragFunctions";
 
 import "./App.css";
@@ -41,7 +42,7 @@ function App() {
       // copy data structure to avoid directly mutating state
       let structureClone: SectionWindow | TabWindow = { ...structure };
       // get reference to copy of source window
-      let window = findWindowById(sourceId, structure.primaryAxis)!;
+      let window = findWindowById(sourceId, structureClone.primaryAxis)!;
 
       if (
         window.tabs.length === 1 &&
@@ -68,7 +69,7 @@ function App() {
         // parse drop zone
         const tab = window.tabs.splice(result.source.index, 1)!;
         // find parent
-        let parent: SectionWindow | TabWindow =
+        const parent: SectionWindow | TabWindow =
           window.parentId === structureClone.id
             ? structureClone
             : findSectionWindowById(
@@ -76,6 +77,13 @@ function App() {
                 structureClone.primaryAxis
               )!;
 
+        const grandparent =
+          structureClone.id === parent.parentId
+            ? structureClone
+            : findSectionWindowById(
+                parent.parentId,
+                structureClone.primaryAxis
+              );
         if (!window.tabs.length) {
           // filter out window with no tabs
           parent.primaryAxis = parent.primaryAxis.filter((window) => {
@@ -86,13 +94,6 @@ function App() {
             }
             return false;
           });
-          const grandparent =
-            structureClone.id === parent.parentId
-              ? structureClone
-              : findSectionWindowById(
-                  parent.parentId,
-                  structureClone.primaryAxis
-                );
           const parentIndex = grandparent?.primaryAxis.indexOf(parent);
           if (parent.primaryAxis.length === 0 && grandparent !== undefined) {
             // remove empty section window from grandparent primary axis
@@ -123,14 +124,6 @@ function App() {
           destinationWindow.tabs.splice(result.destination.index, 0, tab[0]);
           destinationWindow.selectedTabId = tab[0].id;
 
-          let parent: SectionWindow | TabWindow =
-            destinationWindow.parentId === structureClone.id
-              ? structureClone
-              : findSectionWindowById(
-                  destinationWindow.parentId as string,
-                  structure.primaryAxis
-                )!;
-
           // filter out window with no tabs
           parent.primaryAxis = parent.primaryAxis?.filter((window) => {
             if (isTabWindow(window)) {
@@ -142,13 +135,6 @@ function App() {
           });
           // if only one element, transform to tabwindow
           if (parent.primaryAxis?.length === 1) {
-            const grandparent =
-              structureClone.id === parent.parentId
-                ? structureClone
-                : findSectionWindowById(
-                    parent.parentId,
-                    structureClone.primaryAxis
-                  );
             const parentIndex = grandparent?.primaryAxis.indexOf(parent);
             if (grandparent && parentIndex) {
               grandparent.primaryAxis[parentIndex] = parent.primaryAxis[0];
@@ -203,15 +189,16 @@ function App() {
             (destinationSibling.parentIsVertical &&
               destinationDropZone === "bottom") ||
             (!destinationSibling.parentIsVertical &&
-              destinationDropZone !== "bottom")
+              destinationDropZone === ("left" || "right"))
           ) {
             // APPEND TO PARENT PRIMARY AXIS AT CORRECT INDEX
             let siblingIndex = parent.primaryAxis.indexOf(destinationSibling);
             if (destinationSibling.parentIsVertical) {
+              siblingIndex += getRowOffset(destinationId);
               addWindowSectionAtIndex(
                 newWindow,
                 parent.primaryAxis,
-                siblingIndex + 1
+                siblingIndex
               );
             } else {
               siblingIndex += getColumnOffset(destinationId);
@@ -226,38 +213,29 @@ function App() {
              * TRANSFORM TAB WINDOW TO SECTION WINDOW
              */
             destinationSibling.parentIsVertical = parent.isVertical;
+            newWindow.parentIsVertical = parent.isVertical;
             let destinationSiblingIndex = parent.primaryAxis.indexOf(
               destinationSibling
             );
+            let primaryAxis = [];
             if (
-              destinationSibling.parentIsVertical &&
-              !getColumnOffset(destinationId)
+              (destinationSibling.parentIsVertical &&
+                !getColumnOffset(destinationId)) ||
+              (!destinationSibling.parentIsVertical &&
+                !getRowOffset(destinationId))
             ) {
-              // determine if on left or right side and construct array accordingly
-              const newSectionWindow = createNewSectionWindow(
-                [newWindow, destinationSibling],
-                !parent.isVertical,
-                parent.id
-              );
-              parent.primaryAxis[destinationSiblingIndex] = newSectionWindow;
+              // determine location and construct array accordingly
+              primaryAxis = [newWindow, destinationSibling];
             } else {
-              // add it to
-              const newSectionWindow = createNewSectionWindow(
-                [destinationSibling, newWindow],
-                !parent.isVertical,
-                parent.id
-              );
-              parent.primaryAxis[destinationSiblingIndex] = newSectionWindow;
+              primaryAxis = [destinationSibling, newWindow];
             }
+            const newSectionWindow = createNewSectionWindow(
+              primaryAxis,
+              !parent.isVertical,
+              parent.id
+            );
+            parent.primaryAxis[destinationSiblingIndex] = newSectionWindow;
           }
-          // removeRedundantSectionWindows(parent);
-          const grandparent =
-            structureClone.id === parent.parentId
-              ? structureClone
-              : findSectionWindowById(
-                  parent.parentId,
-                  structureClone.primaryAxis
-                );
           if (
             grandparent &&
             parent.primaryAxis.length === 1 &&
@@ -296,13 +274,17 @@ function App() {
         // TRANSFORM TAB WINDOW INTO SECTION WINDOW
         const tab = window.tabs.splice(result.source.index, 1)!;
         const destinationZone = destinationId.split("-")[1];
-        const isVertical = destinationZone === "bottom";
+        const isVertical =
+          destinationZone === "bottom" || destinationZone === "top";
         const newTabWindow = createNewTabWindow(tab, !isVertical, structure.id);
         window.parentIsVertical = isVertical;
 
         let primaryAxis = [];
 
-        if (!isVertical && destinationZone === "left") {
+        if (
+          (!isVertical && destinationZone === "left") ||
+          (isVertical && destinationZone === "top")
+        ) {
           primaryAxis = [newTabWindow, window];
         } else {
           primaryAxis = [window, newTabWindow];

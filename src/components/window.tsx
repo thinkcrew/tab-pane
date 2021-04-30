@@ -66,6 +66,18 @@ const Window: React.FC<WindowProps> = ({ tabWindow, index }) => {
         </Droppable>
       </div>
       <div className="content-area">
+        <Droppable droppableId={`${tabWindow.id}-top-${index}`}>
+          {(provided, snapshot) => (
+            <div
+              className="body-drop-top"
+              ref={provided.innerRef}
+              style={getListStyle(snapshot.isDraggingOver)}
+              {...provided.droppableProps}
+            >
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
         <Droppable droppableId={`${tabWindow.id}-bottom-${index}`}>
           {(provided, snapshot) => (
             <div
