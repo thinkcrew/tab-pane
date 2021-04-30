@@ -179,8 +179,8 @@ function App() {
             structureClone.primaryAxis
           )!;
           const parent =
-            destinationSibling.parentId === structure.id
-              ? structure
+            destinationSibling.parentId === structureClone.id
+              ? structureClone
               : findSectionWindowById(
                   destinationSibling.parentId as string,
                   structure.primaryAxis
@@ -190,6 +190,7 @@ function App() {
             window.parentIsVertical,
             parent?.id || "null"
           );
+
           // recursively search for window of drop zone
           /**
            * WE NEED TO KNOW DIRECTION OF PARENT
@@ -204,7 +205,7 @@ function App() {
             (!destinationSibling.parentIsVertical &&
               destinationDropZone !== "bottom")
           ) {
-            // APPEND TO PARENT PRIMARY AXIS
+            // APPEND TO PARENT PRIMARY AXIS AT CORRECT INDEX
             let siblingIndex = parent.primaryAxis.indexOf(destinationSibling);
             if (destinationSibling.parentIsVertical) {
               addWindowSectionAtIndex(
@@ -249,7 +250,28 @@ function App() {
               parent.primaryAxis[destinationSiblingIndex] = newSectionWindow;
             }
           }
-
+          // removeRedundantSectionWindows(parent);
+          const grandparent =
+            structureClone.id === parent.parentId
+              ? structureClone
+              : findSectionWindowById(
+                  parent.parentId,
+                  structureClone.primaryAxis
+                );
+          if (
+            grandparent &&
+            parent.primaryAxis.length === 1 &&
+            isWindowSection(parent.primaryAxis[0]) &&
+            parent.isVertical !== grandparent.isVertical
+          ) {
+            // EDGE CASE
+            let parentIndex = grandparent.primaryAxis.indexOf(parent);
+            grandparent.primaryAxis.splice(
+              parentIndex,
+              1,
+              ...parent.primaryAxis[0].primaryAxis
+            );
+          }
           setStructure(structureClone);
         }
       }
