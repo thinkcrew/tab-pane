@@ -176,7 +176,6 @@ function App() {
             window.parentIsVertical,
             parent?.id || "null"
           );
-
           // recursively search for window of drop zone
           /**
            * WE NEED TO KNOW DIRECTION OF PARENT
@@ -187,9 +186,11 @@ function App() {
            */
           if (
             (destinationSibling.parentIsVertical &&
-              destinationDropZone === "bottom") ||
+              (destinationDropZone === "bottom" ||
+                destinationDropZone === "top")) ||
             (!destinationSibling.parentIsVertical &&
-              destinationDropZone === ("left" || "right"))
+              (destinationDropZone === "left" ||
+                destinationDropZone === "right"))
           ) {
             // APPEND TO PARENT PRIMARY AXIS AT CORRECT INDEX
             let siblingIndex = parent.primaryAxis.indexOf(destinationSibling);
