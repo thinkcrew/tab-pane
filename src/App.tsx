@@ -6,6 +6,7 @@ import {
   createNewSectionWindow,
   getColumnOffset,
   getRowOffset,
+  filterOutEmptyWindows,
 } from "./utils/dragFunctions";
 
 import "./App.css";
@@ -66,7 +67,7 @@ function App() {
         setStructure(structureClone);
       } else {
         // DROPPING IN DIFFERENT WINDOW
-        // parse drop zone
+        // remove tab from window tabs array
         const tab = window.tabs.splice(result.source.index, 1)!;
         // find parent
         const parent: SectionWindow | TabWindow =
@@ -84,17 +85,12 @@ function App() {
                 parent.parentId,
                 structureClone.primaryAxis
               );
+
         if (!window.tabs.length) {
-          // filter out window with no tabs
-          parent.primaryAxis = parent.primaryAxis.filter((window) => {
-            if (isTabWindow(window)) {
-              return window.tabs.length > 0;
-            } else if (isWindowSection(window)) {
-              return window.primaryAxis.length > 0;
-            }
-            return false;
-          });
+          parent.primaryAxis = filterOutEmptyWindows(parent.primaryAxis);
+
           const parentIndex = grandparent?.primaryAxis.indexOf(parent);
+
           if (parent.primaryAxis.length === 0 && grandparent !== undefined) {
             // remove empty section window from grandparent primary axis
             grandparent.primaryAxis = grandparent?.primaryAxis.filter(
@@ -103,7 +99,7 @@ function App() {
           }
           // if only one element, transform to tabwindow
           if (parent.primaryAxis.length === 1) {
-            if (grandparent && parentIndex) {
+            if (grandparent && parentIndex && parentIndex > -1) {
               grandparent.primaryAxis[parentIndex] = parent.primaryAxis[0];
               grandparent.primaryAxis[parentIndex].parentId = grandparent.id;
               grandparent.primaryAxis.forEach((window) => {
@@ -114,6 +110,7 @@ function App() {
             }
           }
         }
+
         const destinationWindow = findWindowById(
           destinationId,
           structureClone.primaryAxis
@@ -124,19 +121,12 @@ function App() {
           destinationWindow.tabs.splice(result.destination.index, 0, tab[0]);
           destinationWindow.selectedTabId = tab[0].id;
 
-          // filter out window with no tabs
-          parent.primaryAxis = parent.primaryAxis?.filter((window) => {
-            if (isTabWindow(window)) {
-              return window.tabs.length > 0;
-            } else if (isWindowSection(window)) {
-              return window.primaryAxis.length > 0;
-            }
-            return false;
-          });
+          parent.primaryAxis = filterOutEmptyWindows(parent.primaryAxis);
+
           // if only one element, transform to tabwindow
           if (parent.primaryAxis?.length === 1) {
             const parentIndex = grandparent?.primaryAxis.indexOf(parent);
-            if (grandparent && parentIndex) {
+            if (grandparent && parentIndex && parentIndex > -1) {
               grandparent.primaryAxis[parentIndex] = parent.primaryAxis[0];
               grandparent.primaryAxis[parentIndex].parentId = grandparent.id;
             }
@@ -155,7 +145,8 @@ function App() {
           }
           setStructure(structureClone);
         } else {
-          // create new window
+          // CREATE A NEW WINDOW AND PLACE IN THE CORRECT LOCATION
+          // parse drop zone
           const destinationWindowIdAsArray = destinationId.split("-");
           // identify id of destination window
           const destinationWindowId = destinationWindowIdAsArray[0];
@@ -176,7 +167,6 @@ function App() {
             window.parentIsVertical,
             parent?.id || "null"
           );
-          // recursively search for window of drop zone
           /**
            * WE NEED TO KNOW DIRECTION OF PARENT
            * TO DETERMINE WHICH LEVEL TO APPEND
@@ -237,19 +227,23 @@ function App() {
             );
             parent.primaryAxis[destinationSiblingIndex] = newSectionWindow;
           }
+
+          // EDGE CASE
           if (
             grandparent &&
             parent.primaryAxis.length === 1 &&
             isWindowSection(parent.primaryAxis[0]) &&
             parent.isVertical !== grandparent.isVertical
           ) {
-            // EDGE CASE
             let parentIndex = grandparent.primaryAxis.indexOf(parent);
             grandparent.primaryAxis.splice(
               parentIndex,
               1,
               ...parent.primaryAxis[0].primaryAxis
             );
+          }
+          if (isWindowSection(structureClone)) {
+            removeRedundantSectionWindows(structureClone);
           }
           setStructure(structureClone);
         }

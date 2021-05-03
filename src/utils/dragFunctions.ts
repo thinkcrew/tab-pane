@@ -1,5 +1,10 @@
 import { createUniqueWindowId, TabData } from "./tabData";
-import { TabWindow, SectionWindow } from "./tabWindow";
+import {
+  TabWindow,
+  SectionWindow,
+  isWindowSection,
+  isTabWindow,
+} from "./tabWindow";
 
 const grid = 4;
 
@@ -85,4 +90,19 @@ export const createNewSectionWindow = (
     id,
     parentId,
   };
+};
+
+export const filterOutEmptyWindows = (
+  array: (TabWindow | SectionWindow)[]
+): (TabWindow | SectionWindow)[] => {
+  array = array.filter((window) => {
+    if (isTabWindow(window)) {
+      return window.tabs.length > 0;
+    } else if (isWindowSection(window)) {
+      return window.primaryAxis.length > 0;
+    }
+    return false;
+  });
+
+  return array;
 };
