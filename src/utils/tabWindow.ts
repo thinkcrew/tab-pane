@@ -26,7 +26,7 @@ export function isTabWindow(
   return (item as TabWindow).tabs !== undefined;
 }
 
-export function addWindowSectionAtIndex(
+export function addTabWindowAtIndex(
   sibling: TabWindow,
   array: (TabWindow | SectionWindow)[],
   index: number
@@ -80,12 +80,10 @@ export function removeRedundantSectionWindows(structure: SectionWindow): void {
       i += curLength;
     }
   }
-  if (
-    primaryAxis.length === 1 &&
-    isWindowSection(primaryAxis[0]) &&
-    primaryAxis[0].primaryAxis.length === 1
-  ) {
+  if (primaryAxis.length === 1 && isWindowSection(primaryAxis[0])) {
+    structure.isVertical = primaryAxis[0].isVertical;
     structure.primaryAxis = [...primaryAxis[0].primaryAxis];
+    removeRedundantSectionWindows(primaryAxis[0]);
   }
 }
 

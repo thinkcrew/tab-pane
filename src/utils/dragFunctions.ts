@@ -11,7 +11,7 @@ import {
   findWindowById,
   removeRedundantSectionWindows,
   alignWindowDirections,
-  addWindowSectionAtIndex,
+  addTabWindowAtIndex,
 } from "./tabWindow";
 
 const grid = 4;
@@ -113,6 +113,15 @@ export const filterOutEmptyWindows = (
   });
 
   return array;
+};
+
+const filterAllEmptyWindows = (sectionWindow: SectionWindow): void => {
+  sectionWindow.primaryAxis = filterOutEmptyWindows(sectionWindow.primaryAxis);
+  sectionWindow.primaryAxis.forEach((window) => {
+    if (isWindowSection(window)) {
+      filterAllEmptyWindows(window);
+    }
+  });
 };
 
 export function onDragEnd(
@@ -221,10 +230,17 @@ export function onDragEnd(
           structureClone.primaryAxis.length === 1
         ) {
           // reset to default state of single tab window
+          if (
+            isWindowSection(structureClone.primaryAxis[0]) &&
+            structureClone.primaryAxis[0].primaryAxis.length === 1
+          ) {
+            removeRedundantSectionWindows(structureClone);
+          }
           structureClone = structureClone.primaryAxis[0];
           structureClone.parentId = null;
         }
         if (isWindowSection(structureClone)) {
+          filterAllEmptyWindows(structureClone);
           removeRedundantSectionWindows(structureClone);
           alignWindowDirections(structureClone);
         }
@@ -240,7 +256,7 @@ export function onDragEnd(
           destinationWindowId,
           structureClone.primaryAxis
         )!;
-        const parent =
+        const destinationSectionWindow =
           destinationSibling.parentId === structureClone.id
             ? structureClone
             : findSectionWindowById(
@@ -250,7 +266,7 @@ export function onDragEnd(
         const newWindow = createNewTabWindow(
           tab,
           window.parentIsVertical,
-          parent?.id || "null"
+          destinationSectionWindow?.id || "null"
         );
         /**
          * WE NEED TO KNOW DIRECTION OF PARENT
@@ -269,19 +285,21 @@ export function onDragEnd(
           /**
            * APPEND TO PARENT PRIMARY AXIS AT CORRECT INDEX
            */
-          let siblingIndex = parent?.primaryAxis.indexOf(destinationSibling);
+          let siblingIndex = destinationSectionWindow?.primaryAxis.indexOf(
+            destinationSibling
+          );
           if (destinationSibling.parentIsVertical) {
             siblingIndex += getRowOffset(destinationId);
-            addWindowSectionAtIndex(
+            addTabWindowAtIndex(
               newWindow,
-              parent.primaryAxis,
+              destinationSectionWindow.primaryAxis,
               siblingIndex
             );
           } else {
             siblingIndex += getColumnOffset(destinationId);
-            addWindowSectionAtIndex(
+            addTabWindowAtIndex(
               newWindow,
-              parent.primaryAxis,
+              destinationSectionWindow.primaryAxis,
               siblingIndex
             );
           }
@@ -289,9 +307,10 @@ export function onDragEnd(
           /**
            * TRANSFORM TAB WINDOW TO SECTION WINDOW
            */
-          destinationSibling.parentIsVertical = parent.isVertical;
-          newWindow.parentIsVertical = parent.isVertical;
-          let destinationSiblingIndex = parent.primaryAxis.indexOf(
+          destinationSibling.parentIsVertical =
+            destinationSectionWindow.isVertical;
+          newWindow.parentIsVertical = destinationSectionWindow.isVertical;
+          let destinationSiblingIndex = destinationSectionWindow.primaryAxis.indexOf(
             destinationSibling
           );
           let primaryAxis = [];
@@ -308,27 +327,32 @@ export function onDragEnd(
           }
           const newSectionWindow = createNewSectionWindow(
             primaryAxis,
-            !parent.isVertical,
-            parent.id
+            !destinationSectionWindow.isVertical,
+            destinationSectionWindow.id
           );
-          parent.primaryAxis[destinationSiblingIndex] = newSectionWindow;
+          destinationSectionWindow.primaryAxis[
+            destinationSiblingIndex
+          ] = newSectionWindow;
         }
 
         // EDGE CASE
         if (
           grandparent &&
-          parent.primaryAxis.length === 1 &&
-          isWindowSection(parent.primaryAxis[0]) &&
-          parent.isVertical !== grandparent.isVertical
+          destinationSectionWindow.primaryAxis.length === 1 &&
+          isWindowSection(destinationSectionWindow.primaryAxis[0]) &&
+          destinationSectionWindow.isVertical !== grandparent.isVertical
         ) {
-          let parentIndex = grandparent.primaryAxis.indexOf(parent);
+          let parentIndex = grandparent.primaryAxis.indexOf(
+            destinationSectionWindow
+          );
           grandparent.primaryAxis.splice(
             parentIndex,
             1,
-            ...parent.primaryAxis[0].primaryAxis
+            ...destinationSectionWindow.primaryAxis[0].primaryAxis
           );
         }
         if (isWindowSection(structureClone)) {
+          filterAllEmptyWindows(structureClone);
           removeRedundantSectionWindows(structureClone);
           alignWindowDirections(structureClone);
         }
