@@ -269,7 +269,7 @@ export function onDragEnd(
           /**
            * APPEND TO PARENT PRIMARY AXIS AT CORRECT INDEX
            */
-          let siblingIndex = parent.primaryAxis.indexOf(destinationSibling);
+          let siblingIndex = parent?.primaryAxis.indexOf(destinationSibling);
           if (destinationSibling.parentIsVertical) {
             siblingIndex += getRowOffset(destinationId);
             addWindowSectionAtIndex(
