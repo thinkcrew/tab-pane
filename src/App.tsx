@@ -22,6 +22,7 @@ import {
   TabWindow,
   removeRedundantSectionWindows,
   addWindowSectionAtIndex,
+  alignWindowDirections,
 } from "./utils/tabWindow";
 
 function App() {
@@ -142,6 +143,7 @@ function App() {
           }
           if (isWindowSection(structureClone)) {
             removeRedundantSectionWindows(structureClone);
+            alignWindowDirections(structureClone);
           }
           setStructure(structureClone);
         } else {
@@ -244,6 +246,7 @@ function App() {
           }
           if (isWindowSection(structureClone)) {
             removeRedundantSectionWindows(structureClone);
+            alignWindowDirections(structureClone);
           }
           setStructure(structureClone);
         }

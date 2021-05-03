@@ -88,3 +88,14 @@ export function removeRedundantSectionWindows(structure: SectionWindow): void {
     structure.primaryAxis = primaryAxis[0].primaryAxis;
   }
 }
+
+export const alignWindowDirections = (sectionWindow: SectionWindow) => {
+  sectionWindow.primaryAxis.forEach((window) => {
+    if (isTabWindow(window)) {
+      window.parentIsVertical = sectionWindow.isVertical;
+    } else if (isWindowSection(window)) {
+      window.isVertical = !sectionWindow.isVertical;
+      alignWindowDirections(window);
+    }
+  });
+};
