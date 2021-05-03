@@ -175,7 +175,7 @@ export function onDragEnd(
             )!;
 
       const grandparent =
-        structureClone.id === parent.parentId
+        structureClone.id === parent?.parentId
           ? structureClone
           : findSectionWindowById(parent.parentId, structureClone.primaryAxis);
 
