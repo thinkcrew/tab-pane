@@ -198,6 +198,7 @@ export function onDragEnd(
             grandparent.primaryAxis.forEach((window) => {
               if (isTabWindow(window)) {
                 window.parentIsVertical = grandparent.isVertical;
+                window.parentId = grandparent.id;
               }
             });
           }
@@ -230,14 +231,16 @@ export function onDragEnd(
           structureClone.primaryAxis.length === 1
         ) {
           // reset to default state of single tab window
-          if (
+          while (
             isWindowSection(structureClone.primaryAxis[0]) &&
             structureClone.primaryAxis[0].primaryAxis.length === 1
           ) {
             removeRedundantSectionWindows(structureClone);
           }
           structureClone = structureClone.primaryAxis[0];
-          structureClone.parentId = null;
+          if (isWindowSection(structureClone)) structureClone.parentId = null;
+          else if (isTabWindow(structureClone))
+            structureClone.parentId = "null";
         }
         if (isWindowSection(structureClone)) {
           filterAllEmptyWindows(structureClone);

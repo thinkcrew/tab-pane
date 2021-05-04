@@ -81,6 +81,13 @@ export function removeRedundantSectionWindows(structure: SectionWindow): void {
     }
   }
   if (primaryAxis.length === 1 && isWindowSection(primaryAxis[0])) {
+    if (
+      primaryAxis[0].primaryAxis.length === 1 &&
+      isWindowSection(primaryAxis[0].primaryAxis[0])
+    ) {
+      structure.primaryAxis = primaryAxis[0].primaryAxis[0].primaryAxis;
+      removeRedundantSectionWindows(primaryAxis[0].primaryAxis[0]);
+    }
     structure.isVertical = primaryAxis[0].isVertical;
     structure.primaryAxis = [...primaryAxis[0].primaryAxis];
     removeRedundantSectionWindows(primaryAxis[0]);
