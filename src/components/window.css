@@ -4,8 +4,7 @@ section.window {
   height: 100%;
   width: 100%;
   box-sizing: border-box;
-  border-left: 4px solid #777;
-  border-right: 4px solid #777;
+  border: 1px solid #333;
 }
 
 .tabs-bar {

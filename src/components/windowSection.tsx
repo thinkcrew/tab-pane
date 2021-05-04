@@ -1,3 +1,4 @@
+// import Split from "react-split";
 import { SectionWindow } from "../utils/tabWindow";
 import { isWindowSection } from "../utils/tabWindow";
 import Window from "./window";
@@ -16,6 +17,16 @@ const WindowSection: React.FC<SectionWindowProps> = ({ window }) => {
         width: "100%",
       }}
     >
+      {/* <Split
+        direction={window.isVertical ? "vertical" : "horizontal"}
+        gutterSize={12}
+        style={{
+          display: "flex",
+          flexDirection: window.isVertical ? "column" : "row",
+          height: "100%",
+          width: "100%",
+        }}
+      > */}
       {window.primaryAxis?.map((window, index) => {
         if (!isWindowSection(window)) {
           return (
@@ -27,6 +38,7 @@ const WindowSection: React.FC<SectionWindowProps> = ({ window }) => {
           return <WindowSection window={window} key={window.id} />;
         }
       })}
+      {/* </Split> */}
     </div>
   );
 };
