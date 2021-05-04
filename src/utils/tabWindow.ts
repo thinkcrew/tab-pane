@@ -93,7 +93,6 @@ export const alignWindowDirections = (sectionWindow: SectionWindow) => {
       window.parentIsVertical = sectionWindow.isVertical;
       window.parentId = sectionWindow.id;
     } else if (isWindowSection(window)) {
-      window.isVertical = !sectionWindow.isVertical;
       alignWindowDirections(window);
     }
   });
