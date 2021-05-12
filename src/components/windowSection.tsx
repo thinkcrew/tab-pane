@@ -1,7 +1,9 @@
-// import Split from "react-split";
+import "react-reflex/styles.css";
 import { SectionWindow } from "../utils/tabWindow";
 import { isWindowSection } from "../utils/tabWindow";
 import Window from "./window";
+import { ReflexContainer, ReflexSplitter, ReflexElement } from "react-reflex";
+import { createReflex } from "../utils/createReflex";
 
 export interface SectionWindowProps {
   window: SectionWindow;
@@ -9,37 +11,29 @@ export interface SectionWindowProps {
 
 const WindowSection: React.FC<SectionWindowProps> = ({ window }) => {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: window.isVertical ? "column" : "row",
-        height: "100%",
-        width: "100%",
-      }}
+    <ReflexContainer
+      orientation={window.isVertical ? "horizontal" : "vertical"}
     >
-      {/* <Split
-        direction={window.isVertical ? "vertical" : "horizontal"}
-        gutterSize={12}
-        style={{
-          display: "flex",
-          flexDirection: window.isVertical ? "column" : "row",
-          height: "100%",
-          width: "100%",
-        }}
-      > */}
-      {window.primaryAxis?.map((window, index) => {
+      {createReflex(window).map((window: any, index: any) => {
+        if (window === "SPLIT")
+          return <ReflexSplitter key={index} />;
         if (!isWindowSection(window)) {
           return (
             !!window.tabs.length && (
-              <Window tabWindow={window} index={index} key={window.id} />
+              <ReflexElement key={window.id}>
+                <Window tabWindow={window} index={index} />
+              </ReflexElement>
             )
           );
         } else {
-          return <WindowSection window={window} key={window.id} />;
+          return (
+            <ReflexElement key={window.id}>
+              <WindowSection window={window} />
+            </ReflexElement>
+          );
         }
       })}
-      {/* </Split> */}
-    </div>
+    </ReflexContainer>
   );
 };
 
