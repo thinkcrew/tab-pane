@@ -12,18 +12,17 @@ function App() {
   const [structure, setStructure] = useState<TabWindow | SectionWindow>(
     initialWindow
   );
-  console.log(structure);
 
   return (
     <main>
       <DragDropContext
         onDragEnd={(result) => onDragEnd(result, structure, setStructure)}
       >
-        {!isWindowSection(structure) ? (
-          <Window tabWindow={structure} index={0} />
-        ) : (
-          <WindowSection window={structure} />
-        )}
+          {!isWindowSection(structure) ? (
+            <Window tabWindow={structure} index={0} />
+          ) : (
+            <WindowSection window={structure} />
+          )}
       </DragDropContext>
     </main>
   );
